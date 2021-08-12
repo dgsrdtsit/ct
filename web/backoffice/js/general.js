@@ -46,12 +46,6 @@ $(function() {
             event.preventDefault();
     });
 
-    // Confirmation activation
-    $('.activation-btn, .activation-btn-custom, .activation-elt').click(function(event) {
-        if( !confirm('Etes vous sûr de vouloir activer ces imprimés techniques ?') )
-            event.preventDefault();
-    });
-
     // Supprimer la classe Error séléctionnée
     $("input").focus(function() {
         $(this).parents('.form-group').removeClass('has-error');

@@ -35,6 +35,7 @@ security:
             logout:
                 path: /logout
                 target: /
+            anonymous: true
             remember_me:
                 secret:   '%secret%'
                 lifetime: 604800 # 1 week in seconds
@@ -60,7 +61,7 @@ security:
         - { path: ^/admin/type-usage*, role: ROLE_SUPERADMIN }
         - { path: ^/admin/proces-verbal*, role: ROLE_SUPERADMIN }
         - { path: ^/admin/droit-ptac*, role: ROLE_SUPERADMIN }
-        - { path: ^/historique*, role: [ROLE_SUPERADMIN, ROLE_STAFF, ROLE_VISITE] }
+        - { path: ^/historique*, role: [ROLE_SUPERADMIN, ROLE_STAFF, ROLE_VISITE, ROLE_RECEPTION] }
         - { path: ^/admin/type-reception*, role: ROLE_SUPERADMIN }
         - { path: ^/admin/type-constatation-avant-dedouanement*, role: ROLE_SUPERADMIN }
         - { path: ^/admin/visite-extra*, role: ROLE_SUPERADMIN }
@@ -81,6 +82,3 @@ security:
         - { path: ^/admin/vehicule*, role: [ROLE_ADMIN, ROLE_VISITE, ROLE_STAFF] }
 
         - { path: ^/admin, role: ROLE_USER }
-
-        - { path: ^/admin/imprime-tech*, role: [ROLE_SUPERADMIN, ROLE_APPRO] }
-        - { path: ^/admin/bordereau*, role: [ROLE_SUPERADMIN, ROLE_APPRO] }

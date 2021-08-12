@@ -147,15 +147,3 @@ services:
     ct.service.metier.zone_deserte:
         class: Ct\Service\MetierManagerBundle\Metier\CtZoneDeserte\ServiceMetierCtZoneDeserte
         arguments: [ "@doctrine.orm.entity_manager", "@service_container", "%kernel.root_dir%" ]
-
-    ct.service.metier.imprime_tech:
-        class: Ct\Service\MetierManagerBundle\Metier\CtImprimeTech\ServiceMetierCtImprimeTech
-        arguments: [ "@doctrine.orm.entity_manager", "@service_container", "%kernel.root_dir%" ]
-
-    ct.service.metier.bordereau:
-        class: Ct\Service\MetierManagerBundle\Metier\CtBordereau\ServiceMetierCtBordereau
-        arguments: [ "@doctrine.orm.entity_manager", "@service_container", "%kernel.root_dir%" ]
-
-    ct.service.metier.imprime_tech_use :
-        class: Ct\Service\MetierManagerBundle\Metier\CtImprimeTechUse\ServiceMetierCtImprimeTechUse
-        arguments: [ "@doctrine.orm.entity_manager", "@service_container", "%kernel.root_dir%" ]

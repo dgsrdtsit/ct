@@ -63,7 +63,7 @@
                 </li>
             {% endif %}
 
-            {% if is_granted('ROLE_SUPERADMIN') or is_granted('ROLE_STAFF') %}
+            {% if is_granted('ROLE_SUPERADMIN') or is_granted('ROLE_STAFF') or ('ROLE_VISITE') or ('ROLE_RECEPTION')%}
                 {# Historique #}
                 <li class="treeview {% if menu_historique is defined %}{{ active }}{% endif %}">
                     <a href="#">
@@ -77,11 +77,20 @@
                         <li class="{% if menu_historique_list is defined %}{{ active }}{% endif %}">
                             <a href="{{ path('historique_index') }}"><i class="fa fa-circle-o"></i> Voir</a>
                         </li>
+                        <li class="treeview">
+                            <a href="http://dgsrmada.com:2021/ct/statistique" target="_blank">
+                                <i class="fa fa-search"></i>
+                                <span>Consultation CT</span>
+                                <span class="pull-right-container">
+                                    <i class="fa fa-angle-left pull-right"></i>
+                                </span>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             {% endif %}
 
-            {% if (is_granted('ROLE_RECEPTION') or is_granted('ROLE_ADMIN')) or is_granted('ROLE_VISITE') %}
+            {% if (is_granted('ROLE_RECEPTION') or is_granted('ROLE_ADMIN')) %}
                 {# Réception #}
                 <li class="treeview {% if menu_reception is defined %}{{ active }}{% endif %}">
                     <a href="#">
@@ -865,95 +874,6 @@
                                 </li>
                             </ul>
                         </li>
-                    </ul>
-                </li>
-            {% endif %}
-
-
-            {% if (is_granted('ROLE_SUPERADMIN') or is_granted('ROLE_ADMIN') or is_granted('ROLE_APPROVISIONNEMENT') or is_granted('ROLE_RECEPTION') or is_granted('ROLE_VISITE')) %}
-                {# Approvisionnement #}
-                {# <li class="treeview {% if menu_user is defined or menu_role is defined %}{{ active }}{% endif %}"> #}
-                <li class="treeview {% if menu_bordereau is defined %}{{ active }}{% endif %}">
-                    <a href="#">
-                        <i class="fa fa-shopping-basket"></i>
-                        <span>Imprimés techniques</span>
-                        <span class="pull-right-container">
-                            <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul class="treeview-menu">
-                        {% if is_granted('ROLE_ADMIN') %}
-                        {# Activation des imprimés techniques #}
-                        <li class="treeview {% if menu_bordereau is defined %}{% if menu_bordereau_activation is defined %}{{ active }}{% endif %}{% endif %}">
-                            <a href="{{ path('bordereau_activation') }}"><i class="fa fa-check-circle"></i> Activer des imprimés</a>
-                        </li>
-                        {% endif %}
-
-                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_RECEPTION') or is_granted('ROLE_VISITE') %}
-                        {# Activation des imprimés techniques #}
-                        <li class="treeview {% if menu_imprime_tech_use is defined %}{{ active }}{% endif %}">
-                            <a href="#">
-                                <i class="fa fa-archive"></i>
-                                <span>Utilisation IT</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li class="{% if menu_imprime_tech_use_list is defined %}{{ active }}{% endif %}">
-                                    <a href="{{ path('imprime_tech_use_index') }}"><i class="fa fa-search"></i> Liste des IT utilisés</a>
-                                </li>
-                                <li class="{% if menu_imprime_tech_use_search is defined %}{{ active }}{% endif %}">
-                                    <a href="{{ path('imprime_tech_use_search') }}"><i class="fa fa-list-ol"></i> Mise à jour utilisation IT</a>
-                                </li>
-                            </ul>
-                        </li>
-                        {% endif %}
-
-                        {% if is_granted('ROLE_APPROVISIONNEMENT') %}
-                        {# Bordereau d'envoi #}
-                        <li class="treeview {% if menu_bordereau is defined %}{{ active }}{% endif %}">
-                            <a href="#">
-                                <i class="fa fa-archive"></i>
-                                <span>Bordereau de livraison</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li class="{% if menu_bordereau_search is defined %}{{ active }}{% endif %}">
-                                    <a href="{{ path('bordereau_search') }}"><i class="fa fa-search"></i> Rechercher</a>
-                                </li>
-                                <li class="{% if menu_bordereau_list is defined %}{{ active }}{% endif %}">
-                                    <a href="{{ path('bordereau_index') }}"><i class="fa fa-list-ol"></i> Liste</a>
-                                </li>
-                                <li class="{% if menu_bordereau_create is defined %}{{ active }}{% endif %}">
-                                    <a href="{{ path('bordereau_new') }}"><i class="fa fa-plus"></i> Créer</a>
-                                </li>
-                            </ul>
-                        </li>
-                        {% endif %}
-
-                        {% if is_granted('ROLE_SUPERADMIN') %}
-                        {# Imprimé technique #}
-                        <li class="treeview {% if menu_imprime_tech is defined %}{{ active }}{% endif %}">
-                            <a href="#">
-                                <i class="fa fa-print"></i>
-                                <span>Imprimés techniques</span>
-                                <span class="pull-right-container">
-                                    <i class="fa fa-angle-left pull-right"></i>
-                                </span>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li class="{% if menu_imprime_tech_list is defined %}{{ active }}{% endif %}">
-                                    <a href="{{ path('imprime_tech_index') }}"><i class="fa fa-circle-o"></i> Liste</a>
-                                </li>
-                                <li class="{% if menu_imprime_tech_create is defined %}{{ active }}{% endif %}">
-                                    <a href="{{ path('imprime_tech_new') }}"><i class="fa fa-circle-o"></i> Créer</a>
-                                </li>
-                            </ul>
-                        </li>
-                        {% endif %}
                     </ul>
                 </li>
             {% endif %}
