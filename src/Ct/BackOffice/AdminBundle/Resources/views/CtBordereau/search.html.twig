@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'backoffice/base_admin.html.twig' %}
 
 {% form_theme search_form.ctCentre _self %}
@@ -184,4 +185,192 @@
         var _bordereau_generer_bl_uri = "{{ path('bordereau_generer_bl') }}";
     </script>
     <script src="{{ asset('backoffice/js/search.bordereau.js') }}"></script>
+=======
+{% extends 'backoffice/base_admin.html.twig' %}
+
+{% form_theme search_form.ctCentre _self %}
+
+{%- block choice_widget_collapsed -%}
+    {%- if required and placeholder is none and not placeholder_in_choices and not multiple -%}
+        {% set required = false %}
+    {%- endif -%}
+    <span>
+        <select class="select2" data-placeholder="Choisir" style="width: 90%;" oninvalid="setErrorClass($(this));"
+                {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+            {%- if placeholder is not none -%}
+                <option value=""{% if required and value is empty %} selected="selected"{% endif %}>
+                    {{ placeholder != '' ? placeholder|trans({}, translation_domain) }}
+                </option>
+            {%- endif -%}
+            {%- if preferred_choices|length > 0 -%}
+                {% set options = preferred_choices %}
+                {{- block('choice_widget_options') -}}
+                {%- if choices|length > 0 and separator is not none -%}
+                    <option disabled="disabled">{{ separator }}</option>
+                {%- endif -%}
+            {%- endif -%}
+            {%- set options = choices -%}
+            {{- block('choice_widget_options') -}}
+        </select>
+    </span>
+{%- endblock choice_widget_collapsed -%}
+
+{% block title %}{{ parent() }} Recherche bordereau de livraison {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <!-- JQuery UI -->
+    <link href="{{ asset('plugins/jquery-ui-1.12.1/jquery-ui.css') }}" rel="Stylesheet"></link>
+{% endblock %}
+
+{% set menu_bordereau        = true %}
+{% set menu_bordereau_search = true %}
+
+{% block body %}
+    {% for flashMessage in app.session.flashbag.get('success') %}
+        <div class="callout callout-success">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+    {% for flashMessage in app.session.flashbag.get('error') %}
+        <div class="callout callout-danger">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+    
+    {# Formulaire recherche #}
+    <form action="{{ path('bordereau_search') }}" method="POST">
+        <div class="row" id="search-form">
+            <div class="col-md-12">
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h3 class="box-title">Recherche bordereau</h3>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="bl_numero">Numéro du bordereau</label>
+                                    <input required id="bl_numero" value="{{ bl_numero }}" name="bl_numero" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="ct_centre_id">Centre de destination</label>
+                                    <select required id="ct_centre_id" name="ct_centre_id" class="form-control select2">
+                                        <option value="" disabled selected>Séléctionner centre de destination</option>
+                                            {% if (ct_centre_id and ctr_nom) %}
+                                            <option value="{{ ct_centre_id }}" selected>{{ ctr_nom }}</option>
+                                            {% endif %}
+                                            {# {% for list_province in list_provinces %}
+                                                <optgroup label="{{ list_province.prvNom | upper }}"> #}
+                                                    {% for list_centre in list_centres %}
+                                                        {# {% if list_province.id == list_centre.ctProvince.id %} #}
+                                                        <option value="{{ list_centre.id }}">
+                                                            {{ list_centre.ctrNom | upper }}
+                                                        </option>
+                                                        {# {% endif %} #}
+                                                    {% endfor %}
+                                                {# </optgroup>
+                                            {% endfor %} #}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary">
+                                        Rechercher
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% if list_in_its %}
+                        <div class="col-md-2">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <button type="submit" class="pull-left btn btn-primary"
+                                            id="btn-generate-bordereau-livraison" style="">
+                                        Générer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <span class="pull-left" id="link-download-bordereau-livraison"></span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Affichage des listes des imprimés techniques dans le BDD #}
+                {% if list_in_its %}
+                <div class="row" id="search-form">
+                    <div class="col-md-12">
+                        <div class="box box-success">
+                            <div class="box-header">
+                                <h3 class="box-title">Liste des imprimés dans le bordereau</h3>
+                            </div>
+                            <div class="box-body table-responsive">
+                                <table id="liste-imprime-tech-bl" class="table table-bordered table-striped table-condensed">
+                                    <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>N° bordereau</th>
+                                        <th>Nom centre</th>
+                                        <th>Nom IT</th>
+                                        <th>Unité</th>
+                                        <th>Début N° IT</th>
+                                        <th>Fin N° IT</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for list_in_it in list_in_its %}
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" value="{{ list_in_it.id }}" name="delete[]" />
+                                            </td>
+                                            <td>{{ list_in_it.blNumero }}</td>
+                                            <td>{{ list_in_it.ctCentre.ctrNom }}</td>
+                                            <td>{{ list_in_it.ctImprimeTech.nomImprimeTech }}</td>
+                                            <td>{{ list_in_it.ctImprimeTech.uteImprimeTech }}</td>
+                                            <td>{{ list_in_it.blDebutNumero }}</td>
+                                            <td>{{ list_in_it.blFinNumero }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <!-- Vérification existence carte grise -->
+    <!-- JQuery UI -->
+    <script src="{{ asset('plugins/jquery-ui-1.12.1/jquery-ui.js') }}" ></script>
+    <script>
+        var _bordereau_generer_bl_uri = "{{ path('bordereau_generer_bl') }}";
+    </script>
+    <script src="{{ asset('backoffice/js/search.bordereau.js') }}"></script>
+>>>>>>> 2b3b7ad6e848bfb2760c9a2dbb4038c92833b823
 {% endblock %}

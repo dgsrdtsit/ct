@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'backoffice/base_admin.html.twig' %}
 
 {% block title %}{{ parent() }} Liste des utilisations des imprimés techniques {% endblock %}
@@ -230,3 +231,237 @@
     </script>
     <script src="{{ asset('backoffice/js/index.imprimes.js') }}"></script>
 {% endblock %}
+=======
+{% extends 'backoffice/base_admin.html.twig' %}
+
+{% block title %}{{ parent() }} Liste des utilisations des imprimés techniques {% endblock %}
+
+{% set menu_imprime_tech_use      = true %}
+{% set menu_imprime_tech_use_list = true %}
+
+{% block body %}
+    {% for flashMessage in app.session.flashbag.get('success') %}
+        <div class="callout callout-success">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+    {% for flashMessage in app.session.flashbag.get('error') %}
+        <div class="callout callout-danger">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+
+    {% for key, messages in app.session.flashbag.all() %}
+        <div class="callout callout-{{ key }}">
+            {{ messages }} <br />
+        </div>
+    {% endfor %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary kl-bloc-visite">
+                <div class="box-header">
+                    <h3 class="box-title">Feuille d'utilisation des imprimés techniques</h3>
+                </div>
+
+                <div class="box-body">
+                    <form id="ct_fdc_form">
+                        <div class="modal-body">
+
+                            <!-- Année -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_fitu_date">Séléctionner la date</label>
+                                    <input required id="ct_fitu_date" name="ct_fitu_date" class="form-control datepicker"
+                                           value="{{ "now"|date("d/m/Y") }}" />
+                                </div>
+                            </div>
+
+                            <!-- Centre -->
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label for="ct_fitu_centre">Séléctionner le centre</label>
+                                        <select id="ct_fitu_centre" name="ct_fitu_centre" class="form-control select2"
+                                            style="width: 100%;" data-placeholder="Choisir" required>
+                                            <option value="" selected="selected">
+                                                Choisir
+                                            </option>
+                                            {# {% for province in provinces %}
+                                            <optgroup label="{{ province.prvNom }}"> #}
+                                                {% for centre in centres %}
+                                                    {# {% if province.id == centre.ctProvince.id %} #}
+                                                        <option value="{{ centre.id }}">
+                                                            {{ centre.ctrNom|upper }}
+                                                        </option>
+                                                    {# {% endif %} #}
+                                                {% endfor %}
+                                            {# </optgroup>
+                                            {% endfor %} #}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button type="submit" class="pull-left btn btn-primary" id="btn-generate-utilisation-it" style="">
+                                        Générer
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <span class="pull-left" id="link-download-utilisation-it"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {# <div class="col-md-6">
+            <div class="box box-primary kl-bloc-visite">
+                <div class="box-header">
+                    <h3 class="box-title">Situation de stock des imprimés techniques</h3>
+                </div>
+
+                <div class="box-body">
+                    <form id="ct_fdc_form">
+                        <div class="modal-body">
+
+                            <!-- Année -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_situ_date">Séléctionner la date</label>
+                                    <input required id="ct_situ_date" name="ct_situ_date" class="form-control datepicker"
+                                           value="{{ "now"|date("d/m/Y") }}" />
+                                </div>
+                            </div>
+
+                            <!-- Centre -->
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label for="ct_situ_centre">Séléctionner le centre</label>
+                                        <select id="ct_situ_centre" name="ct_situ_centre" class="form-control select2"
+                                            style="width: 100%;" data-placeholder="Choisir" required>
+                                            <option value="" selected="selected">
+                                                Choisir
+                                            </option>
+                                            {% for province in provinces %}
+                                            <optgroup label="{{ province.prvNom }}">
+                                                {% for centre in centres %}
+                                                    {% if province.id == centre.ctProvince.id %}
+                                                        <option value="{{ centre.id }}">
+                                                            {{ centre.ctrNom|upper }}
+                                                        </option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </optgroup>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button type="submit" class="pull-left btn btn-primary" id="btn-generate-stock-it" style="">
+                                        Générer
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <span class="pull-left" id="link-download-stock-it"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div> #}
+    </div>
+
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box box-success">
+                <div class="box-header">
+                    <h3 class="box-title">Liste d'utilisation des imprimés techniques</h3>
+                </div>
+
+                <form action="#" method="POST" class="form-search">
+                    <div class="box-body table-responsive">
+                        <div class="list-count">
+                            <span class="title-count-text"> TOTAL: </span><span class="title-count"></span>
+                        </div>
+                        <table id="liste-imprime-tech-bl" class="table table-bordered table-striped table-condensed">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Réf. utilisation</th>
+                                <th>N° IT</th>
+                                <th>Type IT</th>
+                                <th>Motif utilisation</th>
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for itu_liste in itu_listes %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" value="{{ itu_liste.id }}" name="delete[]" />
+                                    </td>
+                                    <td>{{ itu_liste.ctControle }}</td>
+                                    <td>{{ itu_liste.ituNumero }}</td>
+                                    <td>{{ itu_liste.ctImprimeTech.nomImprimeTech }}</td>
+                                    <td>{{ itu_liste.ituMotifUsed }}</td>
+                                    <td>
+                                        <a class="btn btn-primary" title="Modifier"
+                                           href="{{ path('imprime_tech_use_edit', { 'id': itu_liste.id }) }}">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <!-- Vérification existence carte grise -->
+    <!-- JQuery UI -->
+    <script src="{{ asset('plugins/jquery-ui-1.12.1/jquery-ui.js') }}" ></script>
+    <script type="text/javascript">
+        $(function () {
+            $('#liste-imprime-tech-bl').DataTable(
+            {
+                "order": [[ 0, "desc" ]],
+                "bProcessing": true,
+                "bFilter": true,
+                "oLanguage": {
+                    "sProcessing": "Traitement...",
+                    "oPaginate": {
+                        "sPrevious": "Précédente", // This is the link to the previous page
+                        "sNext": "Suivante", // This is the link to the next page
+                    },
+                    "sSearch": "Filtrer: ",
+                    "sLengthMenu": "Afficher _MENU_ enregistrement par page",
+                    "sEmptyTable": "Aucune marque trouvée",
+                    "sInfo": "Voir _TOTAL_ de _PAGE_ pour _PAGES_ entrées",
+                },
+                "footerCallback": function ( row, data, start, end, display ) {
+                    $('.title-count').html(display.length);
+                }
+            });
+        });
+
+        var _generate_used_it_ajax_uri = "{{ path('imprimes_tech_generate_used_ajax') }}";
+        var _generate_stock_it_ajax_uri = "{{ path('imprimes_tech_stock_generate_ajax') }}";
+    </script>
+    <script src="{{ asset('backoffice/js/index.imprimes.js') }}"></script>
+{% endblock %}
+>>>>>>> 2b3b7ad6e848bfb2760c9a2dbb4038c92833b823

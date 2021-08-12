@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'backoffice/base_admin.html.twig' %}
 
 {% form_theme form ':form:custom_fields.html.twig' %}
@@ -389,4 +390,397 @@
     </script>
 
     <script src="{{ asset('backoffice/js/add.constatation.js') }}"></script>
+=======
+{% extends 'backoffice/base_admin.html.twig' %}
+
+{% form_theme form ':form:custom_fields.html.twig' %}
+{% form_theme form.ctVerificateur _self %}
+
+{%- block choice_widget_collapsed -%}
+    {%- if required and placeholder is none and not placeholder_in_choices and not multiple -%}
+        {% set required = false %}
+    {%- endif -%}
+    <span>
+        <select class="select2" data-placeholder="Choisir" style="width: 100%;" oninvalid="setErrorClass($(this));"
+                {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+            {%- if placeholder is not none -%}
+                <option value=""{% if required and value is empty %} selected="selected"{% endif %}>
+                    {{ placeholder != '' ? placeholder|trans({}, translation_domain) }}
+                </option>
+            {%- endif -%}
+            {%- if preferred_choices|length > 0 -%}
+                {% set options = preferred_choices %}
+                {{- block('choice_widget_options') -}}
+                {%- if choices|length > 0 and separator is not none -%}
+                    <option disabled="disabled">{{ separator }}</option>
+                {%- endif -%}
+            {%- endif -%}
+            {%- set options = choices -%}
+            {{- block('choice_widget_options') -}}
+        </select>
+    </span>
+{%- endblock choice_widget_collapsed -%}
+
+{% block title %}{{ parent() }} Ajout motif {% endblock %}
+
+{% set menu_const_av_ded           = true %}
+{% set menu_const_av_ded_create    = true %}
+
+{% block body %}
+    {% for flashMessage in app.session.flashbag.get('success') %}
+        <div class="callout callout-success">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+    {% for flashMessage in app.session.flashbag.get('error') %}
+        <div class="callout callout-danger">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+
+    {# Formulaire génération feuille de caiise #}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="box box-primary kl-bloc-visite">
+                <div class="box-header">
+                    <h3 class="box-title">Feuille de caisse</h3>
+                </div>
+
+                <div class="box-body">
+                    <form id="ct_fdc_form">
+                        <div class="modal-body">
+
+                            <!-- Année -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_fdc_date">Séléctionner la date</label>
+                                    <input required id="ct_fdc_date" name="ct_fdc_date" class="form-control datepicker"
+                                           value="{{ "now"|date("d/m/Y") }}" />
+                                </div>
+                            </div>
+                                <!-- Centre -->
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label for="ct_fdc_centre">Séléctionner le centre</label>
+                                        <select id="ct_fdc_centre" name="ct_fdc_centre" class="form-control select2"
+                                                style="width: 100%;" data-placeholder="Choisir" required>
+                                                <option value="" selected="selected">
+                                                    Choisir
+                                                </option>
+                                                {# {% for province in provinces %}
+                                                    <optgroup label="{{ province.prvNom }}"> #}
+                                                        {% for centre in centres %}
+                                                            {# {% if province.id == centre.ctProvince.id %} #}
+                                                                <option value="{{ centre.id }}">
+                                                                    {{ centre.ctrNom|upper }}
+                                                                </option>
+                                                            {# {% endif %} #}
+                                                        {% endfor %}
+                                                    {# </optgroup>
+                                                {% endfor %} #}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button type="submit" class="pull-left btn btn-primary"
+                                            id="btn-generate-feuille-caisse" style="">
+                                        Générer
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <span class="pull-left" id="link-download-feuille-caisse"></span>
+                                </div>
+                                <div class="col-md-5">
+                                    <span class="pull-right" id="link-download-feuille-caisse-omavet"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {# Formulaire generation Fiche de Controle Verificateur #}
+        <div class="col-md-6">
+            <div class="box box-primary kl-bloc-visite">
+                <div class="box-header">
+                    <h3 class="box-title">Fiche de Controle</h3>
+                </div>
+
+                <div class="box-body">
+                    <form>
+                        <div class="modal-body">
+                            <!-- Année -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_date_verif">Séléctionner la date</label>
+                                    <input required id="ct_date_verif" name="ct_date_verif" class="form-control datepicker"
+                                           value="26/10/2017" />
+                                </div>
+                            </div>
+
+                            <!-- Centre -->
+                        <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_verif_centre">Séléctionner le centre</label>
+                                    <select required id="ct_verif_centre" name="ct_verif_centre" class="form-control select2"
+                                            style="width: 100%;" data-placeholder="Choisir">
+                                            <option value="" selected="selected">
+                                                Choisir
+                                            </option>
+                                            {# {% for province in provinces %}
+                                                <optgroup label="{{ province.prvNom }}"> #}
+                                                    {% for centre in centres %}
+                                                        {# {% if province.id == centre.ctProvince.id %} #}
+                                                            <option value="{{ centre.id }}">
+                                                                {{ centre.ctrNom|upper }}
+                                                            </option>
+                                                        {# {% endif %} #}
+                                                    {% endfor %}
+                                                {# </optgroup>
+                                            {% endfor %} #}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                            <!-- Verificateur -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_verif">Séléctionner verificateur</label>
+                                    <select required id="ct_verif" name="ct_verif" class="form-control select2"
+                                            style="width: 100%;" data-placeholder="Choisir">
+                                            <option value="" selected="selected">
+                                                Choisir
+                                            </option>
+                                        {% for verif in verificateurs %}
+                                            <option value="{{ verif.id }}">
+                                                {{ verif.usrName|upper }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button type="submit" class="pull-left btn btn-primary"
+                                            id="btn-generate-fiche-verif">
+                                        Générer
+                                    </button>
+                                </div>
+                                <div class="col-md-offset-2 col-md-6">
+                                    <span class="pull-left" id="link-download-fiche-verif"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel panel-default">
+        <div class="panel-heading text-center"><h3>Caractéristiques du véhicule</h3></div>
+        <div class="panel-body">
+            {{ form_start(form) }}
+            <div class="row">
+                {% for cadc in form.ctConstAvDedCaracs %}
+                    {% form_theme cadc.ctGenre _self %}
+                    {% form_theme cadc.ctMarque _self %}
+                    {% form_theme cadc.ctSourceEnergie _self %}
+                    {% form_theme cadc.ctCarosserie _self %}
+                <div class="col-md-4">
+                    <div class="box box-success">
+                        <div class="box-body">
+                            <div class="form-group">
+                                {{ form_widget(cadc.ctConstAvDedType, {'attr': {'class': 'form-control hide'}}) }}
+                            </div>
+                            <div class="form-group">
+                                {{ form_widget(cadc.cadInputCaracType, {'attr': {'class': 'form-control kl-select-cadt'}})}}
+                            </div>
+                            <div class="form-group">
+                                {% if cadc.vars.id == 'ct_service_metiermanagerbundle_constatation_av_ded_ctConstAvDedCaracs_1' %}
+                                    <a href="javascript:void(0)" class="btn btn-primary" id="id-clear-carte-grise">
+                                        Pas de carte grise
+                                    </a>
+                                {% else %}
+                                    <div class="kl-padding-top"></div>
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadPremiereCircule) }}
+                                {{ form_widget(cadc.cadPremiereCircule,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.ctGenre) }}
+                                {{ form_widget(cadc.ctGenre,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.ctMarque) }}
+                                {{ form_widget(cadc.ctMarque,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadTypeCar) }}
+                                {{ form_widget(cadc.cadTypeCar,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadNumSerieType) }}
+                                {{ form_widget(cadc.cadNumSerieType,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadNumMoteur) }}
+                                {{ form_widget(cadc.cadNumMoteur,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.ctSourceEnergie) }}
+                                {{ form_widget(cadc.ctSourceEnergie,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadCylindre) }}
+                                {{ form_widget(cadc.cadCylindre,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadPuissance) }}
+                                {{ form_widget(cadc.cadPuissance,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.ctCarosserie) }}
+                                {{ form_widget(cadc.ctCarosserie,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadNbrAssis) }}
+                                {{ form_widget(cadc.cadNbrAssis,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <hr/>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadLargeur) }}
+                                {{ form_widget(cadc.cadLargeur,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadHauteur) }}
+                                {{ form_widget(cadc.cadHauteur,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadLongueur) }}
+                                {{ form_widget(cadc.cadLongueur,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <hr/>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadChargeUtile) }}
+                                {{ form_widget(cadc.cadChargeUtile,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadPoidsVide) }}
+                                {{ form_widget(cadc.cadPoidsVide,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group">
+                                {{ form_label(cadc.cadPoidsTotalCharge) }}
+                                {{ form_widget(cadc.cadPoidsTotalCharge,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                            <div class="form-group hidden">
+                                {{ form_label(cadc.cadPoidsMaxima) }}
+                                {{ form_widget(cadc.cadPoidsMaxima,{'attr': {'class': 'form-control'}})}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="kl-cav">
+                <div class="col-md-12">
+                    {#<div class="box-body">#}
+                        {{ form_row(form.ctVerificateur ) }}
+                        {{ form_row(form.cadImmatriculation ) }}
+                        {{ form_row(form.cadProvenance) }}
+                        {{ form_row(form.cadDateEmbarquement) }}
+                        {{ form_row(form.cadLieuEmbarquement) }}
+                        {{ form_row(form.cadProprietaireNom) }}
+                        {{ form_row(form.cadProprietaireAdresse) }}
+                        {{ form_row(form.cadDivers) }}
+                        {{ form_row(form.cadObservation) }}
+                        {{ form_row(form.cadConforme) }}
+                        {{ form_row(form.cadBonEtat) }}
+                        {{ form_row(form.cadSecPers) }}
+                        {{ form_row(form.cadSecMarch) }}
+                        {{ form_row(form.cadProtecEnv) }}
+                    {#</div>#}
+                </div>
+            </div>
+            <div class="kl-cav">
+                <div class="col-md-12">
+                    {# Informations des imprimés utilisés #}
+                    <div class="box box-warning">
+                        <div class="box-header">
+                            <h3 class="box-title">Informations imprimés techniques utilisés</h3>
+                        </div>
+
+                        <div class="row">
+                            <div class="box-body">
+                                <div class="form-group" style="margin: 0 8px 0 8px; padding:  0 8px 0 8px;">
+                                    <label for="ct_imprime_tech_use">Séléctionner les N° imprimés utilisés</label>
+                                    <select id="ct_imprime_tech_use" name="ct_imprime_tech_use[]" class="form-control select2 mx-6"
+                                        style="width: 100%;" data-placeholder="  Choisir" multiple="" required>
+                                        {% for imprime_use in imprimes_use %}
+                                            <option value="{{ imprime_use.id }}" selected>
+                                                {{ imprime_use.ituNumero }}
+                                            </option>
+                                        {% endfor %}
+                                        {% for imprime_tech in imprimes_tech %}
+                                        <optgroup label="{{ imprime_tech.nomImprimeTech|upper }}">
+                                            {% for imprime_tech_use in imprimes_tech_use %}
+                                                {% if imprime_tech.id == imprime_tech_use.ctImprimeTech.id %}
+                                                <option value="{{ imprime_tech_use.id }}">
+                                                    {{ imprime_tech_use.ituNumero|upper }}
+                                                </option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </optgroup>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-footer">
+            {% if is_generated is defined %}
+                <a href="{{ path('const_av_ded_generer_pv', { 'id': const_av_ded.id }) }}" target="_blank"
+                   class="btn btn-primary" >
+                    Générer PV
+                </a>
+            {% else %}
+                <input type="submit" class="btn btn-primary" value="Enregistrer" name="new_motif"/>
+            {% endif %}
+            <a href="{{ path('const_av_ded_index') }}"
+               class="btn btn-default pull-left btn-mini-rectif" >
+                Retour à la liste
+            </a>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <!-- JQuery UI -->
+    <script src="{{ asset('plugins/jquery-ui-1.12.1/jquery-ui.js') }}" ></script>
+
+    <script>
+        var _generate_feuille_caisse_ajax_uri = "{{ path('const_av_ded_generate_reporting_feuille_caisse_ajax') }}";
+        var _select_verif_by_centre_ajax_uri = "{{ path('visite_select_verificateur_by_centre_ajax') }}";
+        var _generate_fiche_ctrl_verif_ajax_uri = "{{ path('const_av_ded_generate_reporting_fiche_controle_ajax') }}";
+    </script>
+
+    <script src="{{ asset('backoffice/js/add.constatation.js') }}"></script>
+>>>>>>> 2b3b7ad6e848bfb2760c9a2dbb4038c92833b823
 {% endblock %}

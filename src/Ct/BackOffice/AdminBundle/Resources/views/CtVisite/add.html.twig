@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {% extends 'backoffice/base_admin.html.twig' %}
 
 {% form_theme form ':form:fields.html.twig' %}
@@ -525,3 +526,531 @@
     </script>
     <script src="{{ asset('backoffice/js/add.visite.js') }}"></script>
 {% endblock %}
+=======
+{% extends 'backoffice/base_admin.html.twig' %}
+
+{% form_theme form ':form:fields.html.twig' %}
+
+{#{% form_theme form.ctCarteGrise.ctVehicule.ctMarque _self %}#}
+{#{% form_theme form.ctCarteGrise.ctVehicule.ctGenre _self %}#}
+{#{% form_theme form.ctCarteGrise.ctCentre _self %}#}
+{#{% form_theme form.ctCarteGrise.ctCarosserie _self %}#}
+{% form_theme form.ctUsage _self %}
+{% form_theme form.ctVerificateur _self %}
+{% form_theme form.ctCentre _self %}
+{% form_theme form.ctVisiteExtra _self %}
+{% form_theme form.ctAnomalie _self %}
+
+{%- block choice_widget_collapsed -%}
+    {%- if required and placeholder is none and not placeholder_in_choices and not multiple -%}
+        {% set required = false %}
+    {%- endif -%}
+    <span>
+        <select class="select2" data-placeholder="Choisir" style="width: 100%;" oninvalid="setErrorClass($(this));"
+                {{ block('widget_attributes') }}{% if multiple %} multiple="multiple"{% endif %}>
+            {%- if placeholder is not none -%}
+                <option value=""{% if required and value is empty %} selected="selected"{% endif %}>
+                    {{ placeholder != '' ? placeholder|trans({}, translation_domain) }}
+                </option>
+            {%- endif -%}
+            {%- if preferred_choices|length > 0 -%}
+                {% set options = preferred_choices %}
+                {{- block('choice_widget_options') -}}
+                {%- if choices|length > 0 and separator is not none -%}
+                    <option disabled="disabled">{{ separator }}</option>
+                {%- endif -%}
+            {%- endif -%}
+            {%- set options = choices -%}
+            {{- block('choice_widget_options') -}}
+        </select>
+    </span>
+{%- endblock choice_widget_collapsed -%}
+
+{% block title %}{{ parent() }} Ajout Visite technique {% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+
+    <!-- JQuery UI -->
+    <link href="{{ asset('plugins/jquery-ui-1.12.1/jquery-ui.css') }}" rel="Stylesheet"></link>
+{% endblock %}
+
+{% set menu_visite        = true %}
+{% set menu_visite_create = true %}
+
+{% block body %}
+    {% for flashMessage in app.session.flashbag.get('success') %}
+        <div class="callout callout-success">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+    {% for flashMessage in app.session.flashbag.get('error') %}
+        <div class="callout callout-danger">
+            {{ flashMessage }}
+        </div>
+    {% endfor %}
+
+    {# Formulaire génération feuille de caiise #}
+    <div class="row">
+        <div class="col-md-4">
+            <div class="box box-primary kl-bloc-visite">
+                <div class="box-header">
+                    <h3 class="box-title">Feuille de caisse</h3>
+                </div>
+
+                <div class="box-body">
+                    <form id="ct_fdc_form">
+                        <div class="modal-body">
+
+                            <!-- Année -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_fdc_date">Séléctionner la date</label>
+                                    <input required id="ct_fdc_date" name="ct_fdc_date" class="form-control datepicker"
+                                           value="{{ "now"|date("d/m/Y") }}" />
+                                </div>
+                            </div>
+
+                            <!-- Type visite -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_fdc_type">Séléctionner le type de visite</label>
+                                    <select class="form-control" data-placeholder="Choisir" id="ct_fdc_type" name="ct_fdc_type">
+                                        <option value="" selected="selected">
+                                            Choisir
+                                        </option>
+                                        {% if type_visites %}
+                                            {% for vst in type_visites %}
+                                                <option value="{{ vst.id }}">
+                                                    {{ vst.tpvLibelle }}
+                                                </option>
+                                            {% endfor %}
+                                        {% endif %}
+
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Centre -->
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label for="ct_fdc_centre">Séléctionner le centre</label>
+                                        <select id="ct_fdc_centre" name="ct_fdc_centre" class="form-control select2"
+                                            style="width: 100%;" data-placeholder="Choisir" required>
+                                            <option value="" selected="selected">
+                                                Choisir
+                                            </option>
+                                            {# {% for province in provinces %}
+                                            <optgroup label="{{ province.prvNom }}"> #}
+                                                {% for centre in centres %}
+                                                    {# {% if province.id == centre.ctProvince.id %} #}
+                                                        <option value="{{ centre.id }}">
+                                                            {{ centre.ctrNom|upper }}
+                                                        </option>
+                                                    {# {% endif %} #}
+                                                {% endfor %}
+                                            {# </optgroup>
+                                            {% endfor %} #}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button type="submit" class="pull-left btn btn-primary"
+                                            id="btn-generate-feuille-caisse" style="">
+                                        Générer
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <span class="pull-left" id="link-download-feuille-caisse"></span>
+                                </div>
+                                <div class="col-md-5">
+                                    <span class="pull-right" id="link-download-feuille-caisse-omavet"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {# Formulaire generation Fiche de Controle Verificateur #}
+        <div class="col-md-4">
+            <div class="box box-primary kl-bloc-visite">
+                <div class="box-header">
+                    <h3 class="box-title">Fiche verificateur</h3>
+                </div>
+
+                <div class="box-body">
+                    <form>
+                        <div class="modal-body">
+                            <!-- Année -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_date_verif">Séléctionner la date</label>
+                                    <input required id="ct_date_verif" name="ct_date_verif" class="form-control datepicker"
+                                           value="26/10/2017" />
+                                </div>
+                            </div>
+
+                            <!-- Centre -->
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label for="ct_verif_centre">Séléctionner le centre</label>
+                                        <select required id="ct_verif_centre" name="ct_verif_centre" class="form-control select2"
+                                                style="width: 100%;" data-placeholder="Choisir">
+                                                <option value="" selected="selected">
+                                                    Choisir
+                                                </option>
+                                                {# {% for province in provinces %}
+                                                    <optgroup label="{{ province.prvNom }}"> #}
+                                                        {% for centre in centres %}
+                                                            {# {% if province.id == centre.ctProvince.id %} #}
+                                                                <option value="{{ centre.id }}">
+                                                                    {{ centre.ctrNom|upper }}
+                                                                </option>
+                                                            {# {% endif %} #}
+                                                        {% endfor %}
+                                                    {# </optgroup>
+                                                {% endfor %} #}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Verificateur -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_verif">Séléctionner verificateur</label>
+                                    <select required id="ct_verif" name="ct_verif" class="form-control select2"
+                                            style="width: 100%;" data-placeholder="Choisir">
+                                            <option value="" selected="selected">
+                                                Choisir
+                                            </option>
+                                            {% for verif in verificateurs %}
+                                                <option value="{{ verif.id }}">
+                                                    {{ verif.usrName|upper }}
+                                                </option>
+                                            {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <button type="submit" class="pull-left btn btn-primary"
+                                            id="btn-generate-fiche-verif">
+                                        Générer
+                                    </button>
+                                </div>
+                                <div class="col-md-offset-2 col-md-6">
+                                    <span class="pull-left" id="link-download-fiche-verif"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        {# Formulaire generation Fiche Anomalie #}
+        <div class="col-md-4">
+            <div class="box box-primary kl-bloc-visite">
+                <div class="box-header">
+                    <h3 class="box-title">Liste anomalies</h3>
+                </div>
+
+                <div class="box-body">
+                    <form id="ct_fdc_form">
+                        <div class="modal-body">
+                            <!-- Année -->
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="ct_anomalie_date">Séléctionner la date</label>
+                                    <input required id="ct_anomalie_date" name="ct_anomalie_date" class="form-control datepicker"
+                                           value="{{ "now"|date("d/m/Y") }}" />
+                                </div>
+                            </div>
+
+                                <!-- Centre -->
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                <div class="row">
+                                    <div class="form-group">
+                                        <label for="ct_anomalie_centre">Séléctionner le centre</label>
+                                        <select id="ct_anomalie_centre" name="ct_anomalie_centre" class="form-control select2"
+                                                style="width: 100%;" data-placeholder="Choisir" required>
+                                                <option value="" selected="selected">
+                                                    Choisir
+                                                </option>
+                                                {# {% for province in provinces %}
+                                                    <optgroup label="{{ province.prvNom }}"> #}
+                                                        {% for centre in centres %}
+                                                            {# {% if province.id == centre.ctProvince.id %} #}
+                                                                <option value="{{ centre.id }}">
+                                                                    {{ centre.ctrNom|upper }}
+                                                                </option>
+                                                            {# {% endif %} #}
+                                                        {% endfor %}
+                                                    {# </optgroup>
+                                                {% endfor %} #}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <button type="submit" class="pull-left btn btn-primary"
+                                            id="btn-generate-liste-anomalie">
+                                        Générer
+                                    </button>
+                                </div>
+                                <div class="col-md-5">
+                                    <span class="pull-left" id="link-download-liste-anomalie"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    {# Formulaire recherche #}
+    <div class="row" id="search-form">
+        <div class="col-md-12">
+            <div class="box box-default">
+                <div class="box-header">
+                    <h3 class="box-title">Recherche</h3>
+                </div>
+
+                <div class="box-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ct_numero_immatriculation">Par numéro d'immatriculation</label>
+                                <input id="ct_numero_immatriculation" name="ct_numero_immatriculation"
+                                       class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ct_numero_serie">Par numéro dans la série du type</label>
+                                <input id="ct_numero_serie" name="ct_numero_serie" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="visite-form">
+        {{ form_start(form) }}
+            <div class="row">
+                <div class="col-md-6">
+                    {# Formulaire carte grise #}
+                    <div class="box box-success">
+                        <div class="box-header">
+                            <h3 class="box-title">Informations carte grise</h3>
+                        </div>
+
+                        <div class="box-body" id="form-carte-grise">
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                {{ form_row(form.ctCarteGrise.ctCentre) }}
+                            </div>
+                            {{ form_row(form.ctCarteGrise.cgDateEmission) }}
+                            <hr>
+                            {{ form_row(form.ctCarteGrise.cgImmatriculation) }}
+                            {{ form_row(form.ctCarteGrise.cgNumIdentification) }}
+                            <hr>
+                            {{ form_row(form.ctCarteGrise.cgNom) }}
+                            {#{{ form_row(form.ctCarteGrise.cgPrenom) }}#}
+                            {{ form_row(form.ctCarteGrise.cgProfession) }}
+                            {{ form_row(form.ctCarteGrise.cgAdresse) }}
+                            {{ form_row(form.ctCarteGrise.cgPhone) }}
+                            {{ form_row(form.ctCarteGrise.cgCommune) }}
+                            <hr>
+                            {{ form_row(form.ctCarteGrise.cgIsTransport) }}
+                            <div id="form-transport" class="hidden">
+                                {{ form_row(form.ctCarteGrise.cgNomCooperative) }}
+                                {{ form_row(form.ctCarteGrise.cgItineraire) }}
+                                {{ form_row(form.ctCarteGrise.cgNumVignette) }}
+                                {{ form_row(form.ctCarteGrise.ctZoneDeserte) }}
+                            </div>
+                            <hr>
+                            {{ form_row(form.ctCarteGrise.cgNumCarteViolette) }}
+                            {{ form_row(form.ctCarteGrise.cgLieuCarteViolette) }}
+                            {{ form_row(form.ctCarteGrise.cgDateCarteViolette, {
+                            'attr': {
+                                'class': ' datepicker-edit'
+                            }}) }}
+                            <hr>
+                            {{ form_row(form.ctCarteGrise.cgPatente) }}
+                            {{ form_row(form.ctCarteGrise.cgAni) }}
+                        </div>
+                    </div>
+
+                    {# Formulaire véhicule #}
+                    <div class="box box-success">
+                        <div class="box-header">
+                            <h3 class="box-title">Informations véhicule</h3>
+                        </div>
+
+                        <div class="box-body" id="form-vehicule">
+                            {{ form_row(form.ctCarteGrise.ctVehicule.ctGenre) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcType) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.ctMarque) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcNumSerie) }}
+                            {{ form_row(form.ctCarteGrise.ctCarosserie) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcNumMoteur) }}
+                            {{ form_row(form.ctCarteGrise.ctSourceEnergie) }}
+                            {{ form_row(form.ctCarteGrise.cgPuissanceAdmin) }}
+                            {{ form_row(form.ctCarteGrise.cgNbrAssis) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcPoidsVide) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcChargeUtile) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcPoidsTotalCharge) }}
+                            {{ form_row(form.ctCarteGrise.cgMiseEnService, {
+                                'attr': {
+                                    'class': ' datepicker-edit'
+                                }})
+                            }}
+                        </div>
+
+                        {# Champs cachés #}
+                        <div class="hidden">
+                            <input type="text" name="ct-visite-id" id="ct-visite-id" />
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcPuissance) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcCylindre) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcHauteur) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcLongueur) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcLargeur) }}
+                            {{ form_row(form.ctCarteGrise.ctVehicule.vhcProvenance) }}
+                            {{ form_row(form.ctCarteGrise.cgNbrDebout) }}
+                            <hr>
+                            {{ form_row(form.ctCarteGrise.cgRta) }}
+                            {#{{ form_row(form.ctCarteGrise.cgPatente) }}#}
+                            {#{{ form_row(form.ctCarteGrise.cgAni) }}#}
+                            <hr>
+                            {#{{ form_row(form.ctCarteGrise.cgNumCarteViolette) }}#}
+                            {#{{ form_row(form.ctCarteGrise.cgLieuCarteViolette) }}#}
+                            {#{{ form_row(form.ctCarteGrise.cgDateCarteViolette) }}#}
+                            <hr>
+                            {{ form_row(form.ctCarteGrise.cgDateVignette) }}
+                            {{ form_row(form.ctCarteGrise.cgLieuVignette) }}
+                        </div>
+                    </div>
+                </div>
+
+                {# Formulaire visite #}
+                <div class="col-md-6">
+                    <div class="box box-primary">
+                        <div class="box-header">
+                            <h3 class="box-title">Informations visite technique</h3>
+                        </div>
+
+                        <div class="box-body">
+                            <div class="{% if app.user.ctRole.id != constant('Ct\\Service\\MetierManagerBundle\\Utils\\RoleName::ID_ROLE_SUPERADMIN') %}hidden{% endif %}">
+                                {{ form_row(form.ctCentre) }}
+                            </div>
+                            {{ form_row(form.ctTypeVisite) }}
+                            <hr>
+                            {{ form_row(form.ctUsage) }}
+                            {{ form_row(form.ctUtilisation) }}
+                            {{ form_row(form.ctAnomalie) }}
+                            <div id="form-duree-reparation" class="hidden">
+                                {{ form_row(form.vstDureeReparation) }}
+                            </div>
+                            {{ form_row(form.vstDateExpiration, {
+                            'attr': {
+                                'class': ' datepicker-edit'
+                            }}) }}
+                            {{ form_row(form.ctVerificateur) }}
+                            {{ form_row(form.ctVisiteExtra) }}
+                        </div>
+                    </div>
+                    
+                    {# Informations des imprimés utilisés #}
+                    <div class="box box-warning">
+                        <div class="box-header">
+                            <h3 class="box-title">Informations imprimés techniques utilisés</h3>
+                        </div>
+
+                        <div class="row">
+                            <div class="box-body">
+                                <div class="form-group" style="margin: 0 8px 0 8px; padding:  0 8px 0 8px;">
+                                    <label for="ct_imprime_tech_use">Séléctionner les N° imprimés utilisés</label>
+                                    <select id="ct_imprime_tech_use" name="ct_imprime_tech_use[]" class="form-control select2 mx-6"
+                                        style="width: 100%;" data-placeholder="  Choisir" multiple="" required>
+                                        {% for imprime_tech in imprimes_tech %}
+                                        <optgroup label="{{ imprime_tech.nomImprimeTech|upper }}">
+                                            {% for imprime_tech_use in imprimes_tech_use %}
+                                                {% if imprime_tech.id == imprime_tech_use.ctImprimeTech.id %}
+                                                <option value="{{ imprime_tech_use.id }}">
+                                                    {{ imprime_tech_use.ituNumero|upper }}
+                                                </option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </optgroup>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Formulaire enregistrement #}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="box box-success">
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <input type="submit" class="btn btn-primary" value="Enregistrer" name="new_visite"/>
+                                    {#<input type="button" class="btn btn-success" id="btn-generate-reporting"#}
+                                           {#value="Générer la carte visite" name="generate_carte_visite"/>#}
+                                </div>
+                                {#<div class="col-md-4">#}
+                                    {#<span class="pull-left" id="link-download"></span>#}
+                                {#</div>#}
+                                <div class="col-md-4">
+                                    <input type="button" class="btn btn-success" id="btn-generate-reporting-add"
+                                           value="Générer la carte visite" name="generate_carte_visite-add"/>
+                                    <span class="kl-edit-link-download-cv" id="link-download-cg"></span>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <!-- Vérification existence carte grise -->
+    <!-- JQuery UI -->
+    <script src="{{ asset('plugins/jquery-ui-1.12.1/jquery-ui.js') }}" ></script>
+    <script>
+        var _fill_form_carte_grise_ajax_uri = "{{ path('carte_grise_fill_info_by_immatriculation_ajax') }}";
+        var _autocomplete_numero_serie_ajax_uri = "{{ path('carte_grise_show_numero_serie_ajax') }}";
+        var _autocomplete_numero_immatriculation_ajax_uri = "{{ path('carte_grise_show_numero_immatriculation_ajax') }}";
+        var _generate_reporting_ajax_uri = "{{ path('visite_generate_reporting_ajax') }}";
+        var _generate_feuille_caisse_ajax_uri = "{{ path('visite_generate_reporting_feuille_caisse_ajax') }}";
+        var _select_verif_by_centre_ajax_uri = "{{ path('visite_select_verificateur_by_centre_ajax') }}";
+        var _generate_fiche_ctrl_verif_ajax_uri = "{{ path('visite_generate_reporting_fiche_controle_ajax') }}";
+        var _generate_liste_anomalies_ajax_uri = "{{ path('visite_generate_liste_anomalies_ajax') }}"
+        var _select_usage_by_type_visite_ajax_uri = "{{ path('visite_select_usage_by_type_visite_ajax') }}";
+        var _select_expiration_by_usage_ajax_uri = "{{ path('visite_select_expiration_by_usage_ajax') }}";
+    </script>
+    <script src="{{ asset('backoffice/js/add.visite.js') }}"></script>
+{% endblock %}
+>>>>>>> 2b3b7ad6e848bfb2760c9a2dbb4038c92833b823
